@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: ${{ matrix.compiler }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+    env:
+      CC: ${{ matrix.compiler == 'clang' && 'clang' || 'gcc' }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            appstream clang desktop-file-utils gcc \
+            libevdev-dev libglib2.0-dev libgtk-4-dev libudev-dev \
+            meson ninja-build pkg-config
+
+      - name: Configure
+        run: meson setup build -Dbuildtype=debugoptimized -Dwarning_level=2 -Dwerror=true
+
+      - name: Build
+        run: meson compile -C build
+
+      - name: Test
+        run: meson test -C build --print-errorlogs
+
+      - name: CLI smoke tests
+        run: |
+          ./build/miy-joy --version
+          ./build/miy-joy --help
+          ./build/miy-joy --list
+
+      - name: Validate desktop metadata
+        run: |
+          desktop-file-validate data/io.github.javiju.MiyJoy.desktop
+          set -o pipefail
+          if ! appstreamcli validate --explain data/io.github.javiju.MiyJoy.metainfo.xml 2>&1 | tee appstream.log; then
+            ! grep -q '^E:' appstream.log
+          fi
+
+      - name: Validate staged install
+        run: meson install -C build --destdir "$PWD/stage"
+
+      - name: Build source archive
+        run: meson dist -C build --no-tests
+
+  sanitizers:
+    name: ASan and UBSan
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            libevdev-dev libglib2.0-dev libgtk-4-dev libudev-dev \
+            meson ninja-build pkg-config
+
+      - name: Configure
+        run: meson setup build-asan -Dbuildtype=debug -Db_sanitize=address,undefined
+
+      - name: Build and test
+        run: |
+          meson compile -C build-asan
+          meson test -C build-asan --print-errorlogs

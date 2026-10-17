@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.javiju.MiyJoy</id>
+  <name>Miy Joy</name>
+  <summary>Game controllers: inspect joystick and gamepad input</summary>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <developer>
+    <name>Miy Joy contributors</name>
+  </developer>
+  <content_rating type="oars-1.1"/>
+  <description>
+    <p>Miy Joy is a lightweight GTK4 utility for checking joystick and gamepad axes, buttons, POV hats, and controller touchpads in real time.</p>
+    <p>It reads Linux evdev devices and refreshes the controller list when hardware is connected or removed.</p>
+  </description>
+  <url type="homepage">https://github.com/Javiju555/miy-joy</url>
+  <url type="bugtracker">https://github.com/Javiju555/miy-joy/issues</url>
+  <launchable type="desktop-id">io.github.javiju.MiyJoy.desktop</launchable>
+  <provides>
+    <binary>miy-joy</binary>
+  </provides>
+  <releases>
+    <release version="0.3.0" date="2026-10-17"/>
+  </releases>
+</component>

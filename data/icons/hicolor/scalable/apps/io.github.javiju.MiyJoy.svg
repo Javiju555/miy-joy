@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <title>Miy Joy</title>
+  <rect x="4" y="18" width="120" height="92" rx="42" fill="#1f2937"/>
+  <rect x="12" y="26" width="104" height="76" rx="34" fill="#2f80ed"/>
+  <path d="M35 45v28M21 59h28" stroke="#fff" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="88" cy="51" r="8" fill="#fff"/>
+  <circle cx="101" cy="64" r="8" fill="#fff" opacity=".9"/>
+  <circle cx="88" cy="77" r="8" fill="#fff" opacity=".8"/>
+  <rect x="55" y="78" width="18" height="7" rx="3.5" fill="#dbeafe"/>
+</svg>

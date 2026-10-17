@@ -1,0 +1,18 @@
+[Desktop Entry]
+Type=Application
+Name=Miy Joy
+GenericName=Game Controllers
+GenericName[es]=Dispositivos de juego
+GenericName[pt]=Dispositivos de jogo
+Comment=Test joystick and gamepad input
+Comment[es]=Prueba mandos y joysticks
+Comment[pt]=Teste comandos e joysticks
+Exec=miy-joy
+Icon=io.github.javiju.MiyJoy
+Terminal=false
+StartupNotify=true
+StartupWMClass=io.github.javiju.MiyJoy
+Categories=Utility;GTK;
+Keywords=joystick;gamepad;controller;input;game controllers;
+Keywords[es]=mando;joystick;gamepad;dispositivos de juego;controladores de juego;
+Keywords[pt]=comando;joystick;gamepad;dispositivos de jogo;
