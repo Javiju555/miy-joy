@@ -1,0 +1,98 @@
+name: Release
+
+# Pushing a tag such as v0.3.0 builds the project, runs the tests and publishes
+# a GitHub *pre-release* with a source archive and an x86_64 binary archive.
+# Releases are always marked as pre-release and untested on purpose: see README.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Check the tag matches the project version
+        run: |
+          version="$(sed -n "s/^  version: '\(.*\)',/\1/p" meson.build | head -n1)"
+          if [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match meson.build version v${version}" >&2
+            exit 1
+          fi
+          echo "VERSION=${version}" >> "$GITHUB_ENV"
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            desktop-file-utils gcc libevdev-dev libglib2.0-dev libgtk-4-dev \
+            libudev-dev meson ninja-build pkg-config
+
+      - name: Build and test
+        run: |
+          meson setup build --buildtype=release --prefix=/usr/local -Dwerror=true
+          meson compile -C build
+          meson test -C build --print-errorlogs
+          ./build/miy-joy --version
+
+      - name: Source archive
+        run: |
+          meson dist -C build --no-tests
+          cp "build/meson-dist/miy-joy-${VERSION}.tar.xz" .
+
+      - name: Binary archive (x86_64, built on Ubuntu 24.04)
+        run: |
+          meson install -C build --destdir "$PWD/stage"
+          tar -C stage -czf "miy-joy-${VERSION}-linux-x86_64-ubuntu24.04.tar.gz" usr
+
+      - name: Checksums
+        run: sha256sum miy-joy-* > SHA256SUMS
+
+      - name: Release notes
+        run: |
+          cat > notes.md <<NOTES
+          > **Pre-release, untested.** Miy Joy is early software. The only hardware it
+          > has been tried with is a Microsoft Xbox Series controller over USB, on Arch
+          > Linux with GNOME (Wayland). Many things are missing, see the README.
+          >
+          > The binary archive is built by CI on Ubuntu 24.04 (x86_64) and is not tested
+          > on other distributions. If it does not run for you, build from source.
+
+          ## Files
+
+          - \`miy-joy-${VERSION}.tar.xz\`: source archive (recommended).
+          - \`miy-joy-${VERSION}-linux-x86_64-ubuntu24.04.tar.gz\`: untested prebuilt
+            binaries, laid out for \`/usr/local\`. Needs GTK 4 (>= 4.10), libevdev and libudev.
+          - \`SHA256SUMS\`: checksums of the files above.
+
+          ## Install the binary archive (at your own risk)
+
+          \`\`\`sh
+          sha256sum -c SHA256SUMS --ignore-missing
+          sudo tar -xzf miy-joy-${VERSION}-linux-x86_64-ubuntu24.04.tar.gz -C /
+          miy-joy --list
+          \`\`\`
+
+          Read access to \`/dev/input/event*\` is needed (the desktop session normally
+          grants it). Nothing here needs root at run time.
+          NOTES
+
+      - name: Publish pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --verify-tag \
+            --prerelease \
+            --title "Miy Joy ${VERSION} (pre-release, untested)" \
+            --notes-file notes.md \
+            "miy-joy-${VERSION}.tar.xz" \
+            "miy-joy-${VERSION}-linux-x86_64-ubuntu24.04.tar.gz" \
+            SHA256SUMS

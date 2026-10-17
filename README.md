@@ -6,6 +6,25 @@ It aims to be a lightweight `joy.cpl`-style utility: pick a controller from a
 compact list, open its details, then watch the X/Y quadrant, POV hat, axes, and
 buttons in real time.
 
+## Status: early and barely tested
+
+> **Please read before trusting it.** Miy Joy is early software and has had very
+> little testing.
+>
+> - **Tested:** one Microsoft Xbox Series S|X controller, over USB, on Arch Linux
+>   with GNOME (Wayland). That is the whole list.
+> - **Should work, never tried:** any other gamepad or joystick the kernel exposes
+>   through `/dev/input/event*` (it reads evdev, which covers most HID game
+>   devices), Bluetooth controllers, DualShock/DualSense touchpads, flight sticks
+>   and wheels.
+> - **Missing:** calibration and dead-zone settings, button remapping, showing how
+>   SDL/Steam see a controller, force-feedback beyond a single rumble test,
+>   several controllers side by side, and packages for any distribution
+>   (Flatpak, AUR, deb...). It is Linux only.
+> - The Spanish and Portuguese texts have not been reviewed by anyone else.
+>
+> Bug reports with the output of `miy-joy --list` are very welcome.
+
 ## Features
 
 - GTK4 UI that follows the desktop light/dark theme.
@@ -49,9 +68,25 @@ only be run intentionally; the main application only reads evdev devices.
 
 ## Install
 
+From source, for your user only (no root needed):
+
 ```sh
+meson setup build --buildtype=release --prefix="$HOME/.local"
+meson compile -C build
 meson install -C build
 ```
+
+The installed launcher points at the absolute path of the binary, so it works
+from the desktop menu even when `~/.local/bin` is not in the session's `PATH`.
+
+## Releases
+
+Tagged versions are built and published by CI as **pre-releases marked as
+untested**, with a source archive, an x86_64 binary archive built on Ubuntu
+24.04, and checksums. Prefer the source archive. The binary archive has only been
+checked to start on the machine described in [Status](#status-early-and-barely-tested)
+and will not necessarily run on other distributions. See
+[Releases](https://github.com/Javiju555/miy-joy/releases).
 
 ## Dependencies
 
